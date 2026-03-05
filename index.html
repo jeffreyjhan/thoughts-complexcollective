@@ -52,14 +52,7 @@
     height: 60px;
   }
 
-  .logo {
-    font-family: var(--serif);
-    font-size: 1.1rem;
-    letter-spacing: 0.02em;
-    color: var(--text);
-    text-decoration: none;
-    cursor: pointer;
-  }
+  .logo { font-family: var(--serif); font-size: 1.1rem; letter-spacing: 0.02em; color: var(--text); text-decoration: none; cursor: pointer; }
   .logo span { color: var(--accent); }
 
   nav { display: flex; align-items: center; }
@@ -101,11 +94,27 @@
   .section { display: none; }
   .section.active { display: block; }
 
+  /* HERO */
   .hero { padding: 3rem 0 5rem; border-bottom: 1px solid var(--border); margin-bottom: 4rem; }
   .hero-label { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem; }
   .hero h1 { font-family: var(--serif); font-size: clamp(2.8rem, 6vw, 5rem); font-weight: 900; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
   .hero h1 em { font-style: italic; color: var(--accent); }
-  .hero p { font-size: 1.05rem; color: var(--text-muted); max-width: 540px; line-height: 1.8; }
+  .hero p { font-size: 1.05rem; color: var(--text-muted); max-width: 580px; line-height: 1.8; margin-bottom: 1rem; }
+  .hero p:last-child { margin-bottom: 0; }
+  .hero-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.8rem;
+    margin-top: 0.5rem;
+  }
+  .hero-note::before { content: '✍'; font-style: normal; }
 
   .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 3rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
   .section-header h2 { font-family: var(--serif); font-size: 2rem; font-weight: 700; }
@@ -205,6 +214,8 @@
       <p class="hero-label">CEO · Complex Collective · Vancouver</p>
       <h1>Builder.<br><em>Thinker.</em><br>Operator.</h1>
       <p>I help digital product creators grow revenue through YouTube acquisition. These are my unfiltered notes on business, strategy, and what I'm learning in real time.</p>
+      <p>Every word on this site is written by me. No AI, no ghostwriter. Just how I actually think.</p>
+      <span class="hero-note">Written by Jeffrey Han</span>
     </div>
     <div id="home-recent"></div>
   </section>
@@ -229,7 +240,7 @@
       <button class="rtab" onclick="switchReflectionTab('monthly')">Monthly</button>
     </div>
     <div id="reflect-weekly">
-      <div class="period-label">Every week — Sunday night or Monday morning</div>
+      <div class="period-label">Every week. Sunday night or Monday morning.</div>
       <div class="prompt-block" id="pb-w1"></div>
       <div class="prompt-block" id="pb-w2"></div>
       <div class="prompt-block" id="pb-w3"></div>
@@ -283,7 +294,7 @@
 
 <script>
 const SUPABASE_URL = 'https://csyukbmlmmdsgntyymdj.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_1wxwF6keh-EQVYisqsWLrQ_FzAQzwne';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzeXVrYm1sbW1kc2dudHZ5bWRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MjY2MTMsImV4cCI6MjA4ODMwMjYxM30.JvTIUPzw9rb5XQsC58Fa3Ddp-jAXRlI_r4yt_7TBA9Q';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -292,7 +303,7 @@ let isAdmin = false;
 let postsCache = null;
 
 const WEEKLY_PROMPTS = [
-  { id: 'w1', text: 'What decisions did I make this week — and what assumptions did I make that I never questioned?' },
+  { id: 'w1', text: 'What decisions did I make this week, and what assumptions did I make that I never questioned?' },
   { id: 'w2', text: "What happened this week that I don't fully understand yet? What would I need to learn to understand it?" },
   { id: 'w3', text: 'If someone in a completely different industry looked at my biggest challenge this week, what would they say?' },
 ];
