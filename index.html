@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,7 +29,6 @@
   }
 
   html { scroll-behavior: smooth; }
-
   body {
     background: var(--bg);
     color: var(--text);
@@ -38,7 +38,6 @@
     min-height: 100vh;
   }
 
-  /* ─── LAYOUT ─── */
   .site-header {
     border-bottom: 1px solid var(--border);
     padding: 0 2rem;
@@ -59,10 +58,11 @@
     letter-spacing: 0.02em;
     color: var(--text);
     text-decoration: none;
+    cursor: pointer;
   }
   .logo span { color: var(--accent); }
 
-  nav { display: flex; gap: 0; }
+  nav { display: flex; align-items: center; }
   nav a {
     font-family: var(--mono);
     font-size: 0.72rem;
@@ -76,344 +76,111 @@
     align-items: center;
     border-left: 1px solid var(--border);
     transition: color 0.15s, background 0.15s;
+    cursor: pointer;
   }
   nav a:hover, nav a.active { color: var(--accent); background: rgba(200,169,110,0.04); }
 
-  .main { max-width: 860px; margin: 0 auto; padding: 4rem 2rem; }
+  #admin-toggle {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    border-left: 1px solid var(--border);
+    cursor: pointer;
+    padding: 0 1rem;
+    height: 60px;
+    transition: color 0.15s;
+  }
+  #admin-toggle:hover { color: var(--accent-dim); }
+  #admin-toggle.active { color: var(--accent); }
 
-  /* ─── SECTIONS ─── */
+  .main { max-width: 860px; margin: 0 auto; padding: 4rem 2rem; }
   .section { display: none; }
   .section.active { display: block; }
 
-  /* ─── HERO ─── */
   .hero { padding: 3rem 0 5rem; border-bottom: 1px solid var(--border); margin-bottom: 4rem; }
-  .hero-label {
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 1.5rem;
-  }
-  .hero h1 {
-    font-family: var(--serif);
-    font-size: clamp(2.8rem, 6vw, 5rem);
-    font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-    margin-bottom: 1.5rem;
-  }
+  .hero-label { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem; }
+  .hero h1 { font-family: var(--serif); font-size: clamp(2.8rem, 6vw, 5rem); font-weight: 900; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
   .hero h1 em { font-style: italic; color: var(--accent); }
-  .hero p {
-    font-size: 1.05rem;
-    color: var(--text-muted);
-    max-width: 540px;
-    line-height: 1.8;
-  }
+  .hero p { font-size: 1.05rem; color: var(--text-muted); max-width: 540px; line-height: 1.8; }
 
-  /* ─── THOUGHTS ─── */
-  .section-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 3rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .section-header h2 {
-    font-family: var(--serif);
-    font-size: 2rem;
-    font-weight: 700;
-  }
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 3rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  .section-header h2 { font-family: var(--serif); font-size: 2rem; font-weight: 700; }
 
-  .btn {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.6rem 1.2rem;
-    border: 1px solid var(--accent-dim);
-    background: transparent;
-    color: var(--accent);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
+  .btn { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.6rem 1.2rem; border: 1px solid var(--accent-dim); background: transparent; color: var(--accent); cursor: pointer; transition: all 0.15s; }
   .btn:hover { background: var(--accent); color: var(--bg); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn.secondary { border-color: var(--border-light); color: var(--text-muted); }
   .btn.secondary:hover { background: var(--border-light); color: var(--text); }
   .btn.danger { border-color: var(--danger); color: var(--danger); }
   .btn.danger:hover { background: var(--danger); color: white; }
 
-  .post-list { display: flex; flex-direction: column; gap: 0; }
-  .post-item {
-    padding: 2rem 0;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: padding-left 0.2s;
-  }
+  .post-list { display: flex; flex-direction: column; }
+  .post-item { padding: 2rem 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: padding-left 0.2s; }
   .post-item:hover { padding-left: 0.5rem; }
-  .post-meta {
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent-dim);
-    margin-bottom: 0.6rem;
-  }
-  .post-item h3 {
-    font-family: var(--serif);
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    line-height: 1.3;
-  }
-  .post-preview {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    line-height: 1.7;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+  .post-meta { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 0.6rem; }
+  .post-item h3 { font-family: var(--serif); font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.3; }
+  .post-preview { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-  .empty-state {
-    text-align: center;
-    padding: 5rem 0;
-    color: var(--text-muted);
-  }
+  .empty-state { text-align: center; padding: 5rem 0; color: var(--text-muted); }
   .empty-state p { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.1em; }
+  .loading { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); padding: 3rem 0; text-align: center; }
 
-  /* ─── COMPOSE / READ MODAL ─── */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 200;
-    overflow-y: auto;
-    padding: 2rem;
-  }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; overflow-y: auto; padding: 2rem; }
   .modal-overlay.open { display: flex; justify-content: center; align-items: flex-start; padding-top: 4rem; }
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border-light);
-    width: 100%;
-    max-width: 720px;
-    padding: 3rem;
-    position: relative;
-  }
-  .modal-close {
-    position: absolute;
-    top: 1.5rem; right: 1.5rem;
-    background: none; border: none;
-    color: var(--text-muted);
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    cursor: pointer;
-    letter-spacing: 0.1em;
-  }
+  .modal { background: var(--surface); border: 1px solid var(--border-light); width: 100%; max-width: 720px; padding: 3rem; position: relative; }
+  .modal.narrow { max-width: 400px; }
+  .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: var(--text-muted); font-family: var(--mono); font-size: 0.75rem; cursor: pointer; letter-spacing: 0.1em; }
   .modal-close:hover { color: var(--text); }
+  .modal h3 { font-family: var(--serif); font-size: 1.5rem; margin-bottom: 1.5rem; }
 
   .field { margin-bottom: 1.5rem; }
-  .field label {
-    display: block;
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent-dim);
-    margin-bottom: 0.5rem;
-  }
-  .field input, .field textarea, .field select {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border-light);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 0.95rem;
-    font-weight: 300;
-    padding: 0.75rem 1rem;
-    outline: none;
-    resize: vertical;
-    transition: border-color 0.15s;
-  }
+  .field label { display: block; font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 0.5rem; }
+  .field input, .field textarea { width: 100%; background: var(--bg); border: 1px solid var(--border-light); color: var(--text); font-family: var(--sans); font-size: 0.95rem; font-weight: 300; padding: 0.75rem 1rem; outline: none; resize: vertical; transition: border-color 0.15s; }
   .field input:focus, .field textarea:focus { border-color: var(--accent-dim); }
   .field textarea { min-height: 280px; line-height: 1.8; }
-
   .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+  .pw-error { font-family: var(--mono); font-size: 0.7rem; color: var(--danger); margin-top: 0.5rem; display: none; }
 
-  /* ─── POST READER ─── */
   .post-reader { max-width: 680px; }
-  .reader-back {
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent-dim);
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin-bottom: 2.5rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0;
-  }
+  .reader-back { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent-dim); background: none; border: none; cursor: pointer; margin-bottom: 2.5rem; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0; }
   .reader-back:hover { color: var(--accent); }
-  .post-reader h1 {
-    font-family: var(--serif);
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    font-weight: 900;
-    line-height: 1.1;
-    margin-bottom: 1rem;
-  }
+  .post-reader h1 { font-family: var(--serif); font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 900; line-height: 1.1; margin-bottom: 1rem; }
   .post-reader .post-meta { margin-bottom: 2.5rem; }
-  .post-reader .body {
-    font-size: 1rem;
-    line-height: 1.9;
-    color: #c8c4bc;
-    white-space: pre-wrap;
-  }
+  .post-reader .body { font-size: 1rem; line-height: 1.9; color: #c8c4bc; white-space: pre-wrap; }
   .post-reader .reader-actions { margin-top: 3rem; display: flex; gap: 0.75rem; }
 
-  /* ─── REFLECTIONS ─── */
-  .reflection-tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 3rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .rtab {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 0.8rem 1.5rem;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: var(--text-muted);
-    cursor: pointer;
-    margin-bottom: -1px;
-    transition: all 0.15s;
-  }
+  .reflection-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 3rem; }
+  .rtab { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.8rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); cursor: pointer; margin-bottom: -1px; transition: all 0.15s; }
   .rtab.active { color: var(--accent); border-bottom-color: var(--accent); }
   .rtab:hover { color: var(--text); }
 
-  .prompt-block {
-    border: 1px solid var(--border);
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-  }
-  .prompt-header {
-    background: var(--surface);
-    padding: 1.2rem 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-  }
-  .prompt-q {
-    font-family: var(--serif);
-    font-size: 1rem;
-    font-style: italic;
-    line-height: 1.4;
-  }
-  .prompt-num {
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    flex-shrink: 0;
-    margin-left: 1rem;
-  }
-  .prompt-entries { padding: 0; }
-  .entry-item {
-    padding: 1.2rem 1.5rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-  }
+  .period-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .period-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .prompt-block { border: 1px solid var(--border); margin-bottom: 1.5rem; overflow: hidden; }
+  .prompt-header { background: var(--surface); padding: 1.2rem 1.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .prompt-q { font-family: var(--serif); font-size: 1rem; font-style: italic; line-height: 1.4; }
+  .prompt-num { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); letter-spacing: 0.1em; flex-shrink: 0; margin-left: 1rem; }
+
+  .entry-item { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; gap: 1rem; align-items: flex-start; }
   .entry-item:last-child { border-bottom: none; }
-  .entry-date {
-    font-family: var(--mono);
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    white-space: nowrap;
-    padding-top: 0.2rem;
-    min-width: 90px;
-  }
+  .entry-date { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; white-space: nowrap; padding-top: 0.2rem; min-width: 90px; }
   .entry-text { font-size: 0.9rem; color: var(--text); line-height: 1.7; flex: 1; }
-  .entry-del {
-    background: none; border: none;
-    color: var(--text-dim); cursor: pointer;
-    font-size: 0.9rem; padding: 0;
-    flex-shrink: 0;
-  }
+  .entry-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 0.9rem; padding: 0; flex-shrink: 0; }
   .entry-del:hover { color: var(--danger); }
 
-  .prompt-add {
-    padding: 1rem 1.5rem;
-    background: var(--bg);
-    display: flex;
-    gap: 0.75rem;
-    border-top: 1px solid var(--border);
-  }
-  .prompt-add textarea {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border-light);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 0.85rem;
-    font-weight: 300;
-    padding: 0.6rem 0.8rem;
-    outline: none;
-    resize: none;
-    min-height: 60px;
-    line-height: 1.6;
-  }
+  .prompt-add { padding: 1rem 1.5rem; background: var(--bg); display: flex; gap: 0.75rem; border-top: 1px solid var(--border); }
+  .prompt-add textarea { flex: 1; background: var(--surface); border: 1px solid var(--border-light); color: var(--text); font-family: var(--sans); font-size: 0.85rem; font-weight: 300; padding: 0.6rem 0.8rem; outline: none; resize: none; min-height: 60px; line-height: 1.6; }
   .prompt-add textarea:focus { border-color: var(--accent-dim); }
-  .prompt-add-btn {
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.6rem 1rem;
-    border: 1px solid var(--accent-dim);
-    background: transparent;
-    color: var(--accent);
-    cursor: pointer;
-    align-self: flex-end;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
+  .prompt-add-btn { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.6rem 1rem; border: 1px solid var(--accent-dim); background: transparent; color: var(--accent); cursor: pointer; align-self: flex-end; transition: all 0.15s; white-space: nowrap; }
   .prompt-add-btn:hover { background: var(--accent); color: var(--bg); }
+  .prompt-add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .admin-locked { font-family: var(--mono); font-size: 0.75rem; color: var(--text-muted); padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: var(--bg); letter-spacing: 0.05em; }
 
-  .period-label {
-    font-family: var(--mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent-dim);
-    margin-bottom: 1.5rem;
-    margin-top: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  .period-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* ─── SCROLLBAR ─── */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border-light); }
@@ -422,64 +189,53 @@
 <body>
 
 <header class="site-header">
-  <a class="logo" href="#" onclick="showSection('home')">Jeffrey <span>Han</span></a>
+  <span class="logo" onclick="showSection('home')">Jeffrey <span>Han</span></span>
   <nav>
-    <a href="#" onclick="showSection('home')" id="nav-home" class="active">Home</a>
-    <a href="#" onclick="showSection('thoughts')" id="nav-thoughts">Thoughts</a>
-    <a href="#" onclick="showSection('reflections')" id="nav-reflections">Reflections</a>
+    <a onclick="showSection('home')" id="nav-home" class="active">Home</a>
+    <a onclick="showSection('thoughts')" id="nav-thoughts">Thoughts</a>
+    <a onclick="showSection('reflections')" id="nav-reflections">Reflections</a>
+    <button id="admin-toggle" onclick="toggleAdmin()">Admin</button>
   </nav>
 </header>
 
 <main class="main">
 
-  <!-- HOME -->
   <section class="section active" id="sec-home">
     <div class="hero">
       <p class="hero-label">CEO · Complex Collective · Vancouver</p>
       <h1>Builder.<br><em>Thinker.</em><br>Operator.</h1>
       <p>I help digital product creators grow revenue through YouTube acquisition. These are my unfiltered notes on business, strategy, and what I'm learning in real time.</p>
     </div>
-
     <div id="home-recent"></div>
   </section>
 
-  <!-- THOUGHTS -->
   <section class="section" id="sec-thoughts">
     <div id="thoughts-list-view">
       <div class="section-header">
         <h2>Thoughts</h2>
-        <button class="btn" onclick="openCompose()">+ New Post</button>
+        <button class="btn" id="new-post-btn" onclick="openCompose()" style="display:none">+ New Post</button>
       </div>
-      <div class="post-list" id="post-list"></div>
+      <div id="post-list"><div class="loading">Loading...</div></div>
     </div>
     <div id="thoughts-reader-view" style="display:none">
       <div class="post-reader" id="post-reader-content"></div>
     </div>
   </section>
 
-  <!-- REFLECTIONS -->
   <section class="section" id="sec-reflections">
-    <div class="section-header">
-      <h2>Reflections</h2>
-    </div>
+    <div class="section-header"><h2>Reflections</h2></div>
     <div class="reflection-tabs">
-      <button class="rtab active" id="rtab-weekly" onclick="switchReflectionTab('weekly')">Weekly</button>
-      <button class="rtab" id="rtab-monthly" onclick="switchReflectionTab('monthly')">Monthly</button>
+      <button class="rtab active" onclick="switchReflectionTab('weekly')">Weekly</button>
+      <button class="rtab" onclick="switchReflectionTab('monthly')">Monthly</button>
     </div>
-
-    <!-- WEEKLY -->
     <div id="reflect-weekly">
       <div class="period-label">Every week — Sunday night or Monday morning</div>
-
       <div class="prompt-block" id="pb-w1"></div>
       <div class="prompt-block" id="pb-w2"></div>
       <div class="prompt-block" id="pb-w3"></div>
     </div>
-
-    <!-- MONTHLY -->
     <div id="reflect-monthly" style="display:none">
       <div class="period-label">First Sunday of every month</div>
-
       <div class="prompt-block" id="pb-m1"></div>
       <div class="prompt-block" id="pb-m2"></div>
       <div class="prompt-block" id="pb-m3"></div>
@@ -488,6 +244,23 @@
   </section>
 
 </main>
+
+<!-- PASSWORD MODAL -->
+<div class="modal-overlay" id="pw-modal">
+  <div class="modal narrow">
+    <button class="modal-close" onclick="closePwModal()">✕ close</button>
+    <h3>Admin Access</h3>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPassword()">
+      <p class="pw-error" id="pw-error">Incorrect password.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closePwModal()">Cancel</button>
+      <button class="btn" onclick="checkPassword()">Unlock</button>
+    </div>
+  </div>
+</div>
 
 <!-- COMPOSE MODAL -->
 <div class="modal-overlay" id="compose-modal">
@@ -503,76 +276,105 @@
     </div>
     <div class="modal-actions">
       <button class="btn secondary" onclick="closeCompose()">Cancel</button>
-      <button class="btn" onclick="publishPost()">Publish</button>
+      <button class="btn" id="publish-btn" onclick="publishPost()">Publish</button>
     </div>
   </div>
 </div>
 
 <script>
-// ─── STATE ───
-const STORAGE_KEYS = { posts: 'jh_posts', reflections: 'jh_reflections' };
+const SUPABASE_URL = 'https://csyukbmlmmdsgntyymdj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_1wxwF6keh-EQVYisqsWLrQ_FzAQzwne';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function load(key) {
-  try { return JSON.parse(localStorage.getItem(key)) || []; }
-  catch { return []; }
-}
-function save(key, data) {
-  try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
-}
+const ADMIN_PASSWORD = 'complex2024';
+let isAdmin = false;
+let postsCache = null;
 
-let posts = load(STORAGE_KEYS.posts);
-let reflections = load(STORAGE_KEYS.reflections);
-
-// ─── PROMPTS CONFIG ───
 const WEEKLY_PROMPTS = [
   { id: 'w1', text: 'What decisions did I make this week — and what assumptions did I make that I never questioned?' },
-  { id: 'w2', text: 'What happened this week that I don\'t fully understand yet? What would I need to learn to understand it?' },
+  { id: 'w2', text: "What happened this week that I don't fully understand yet? What would I need to learn to understand it?" },
   { id: 'w3', text: 'If someone in a completely different industry looked at my biggest challenge this week, what would they say?' },
 ];
 const MONTHLY_PROMPTS = [
   { id: 'm1', text: 'What would have to be true for my current approach to be completely wrong?' },
-  { id: 'm2', text: 'What\'s the biggest unknown I\'m operating around right now — and why haven\'t I resolved it?' },
+  { id: 'm2', text: "What's the biggest unknown I'm operating around right now — and why haven't I resolved it?" },
   { id: 'm3', text: 'What decision am I avoiding, and what would it cost me to keep avoiding it?' },
   { id: 'm4', text: 'Who disagreed with me this month? Were they right, even partially?' },
 ];
 
-// ─── NAV ───
+// ── ADMIN ──
+function toggleAdmin() {
+  if (isAdmin) {
+    isAdmin = false;
+    document.getElementById('admin-toggle').classList.remove('active');
+    document.getElementById('new-post-btn').style.display = 'none';
+    renderReflectionPrompts();
+    return;
+  }
+  document.getElementById('pw-modal').classList.add('open');
+  setTimeout(() => document.getElementById('pw-input').focus(), 100);
+}
+function checkPassword() {
+  if (document.getElementById('pw-input').value === ADMIN_PASSWORD) {
+    isAdmin = true;
+    document.getElementById('admin-toggle').classList.add('active');
+    document.getElementById('new-post-btn').style.display = 'block';
+    closePwModal();
+    renderReflectionPrompts();
+    if (document.getElementById('sec-thoughts').classList.contains('active')) renderPostList();
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+  }
+}
+function closePwModal() {
+  document.getElementById('pw-modal').classList.remove('open');
+  document.getElementById('pw-input').value = '';
+  document.getElementById('pw-error').style.display = 'none';
+}
+
+// ── NAV ──
 function showSection(name) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
   document.getElementById('sec-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'thoughts') renderPostList();
+  if (name === 'thoughts') { showThoughtsList(); renderPostList(); }
   if (name === 'home') renderHomeRecent();
-  return false;
 }
 
-// ─── POSTS ───
-function renderPostList() {
+// ── POSTS ──
+async function fetchPosts() {
+  const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
+  if (error) { console.error(error); return []; }
+  postsCache = data;
+  return data;
+}
+
+async function renderPostList() {
   const container = document.getElementById('post-list');
-  if (!posts.length) {
-    container.innerHTML = '<div class="empty-state"><p>No posts yet — start writing.</p></div>';
-    return;
-  }
-  container.innerHTML = posts.slice().reverse().map(p => `
+  container.innerHTML = '<div class="loading">Loading...</div>';
+  const posts = await fetchPosts();
+  if (!posts.length) { container.innerHTML = '<div class="empty-state"><p>No posts yet.</p></div>'; return; }
+  container.innerHTML = posts.map(p => `
     <div class="post-item" onclick="openPost('${p.id}')">
-      <div class="post-meta">${formatDate(p.date)}</div>
+      <div class="post-meta">${formatDate(p.created_at)}</div>
       <h3>${escHtml(p.title)}</h3>
       <p class="post-preview">${escHtml(p.body)}</p>
     </div>
   `).join('');
 }
 
-function renderHomeRecent() {
+async function renderHomeRecent() {
   const container = document.getElementById('home-recent');
-  const recent = posts.slice(-3).reverse();
-  if (!recent.length) { container.innerHTML = ''; return; }
+  const { data: posts } = await db.from('posts').select('*').order('created_at', { ascending: false }).limit(3);
+  if (!posts || !posts.length) { container.innerHTML = ''; return; }
   container.innerHTML = `
-    <div style="margin-bottom:2rem">
+    <div>
       <div style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent-dim);margin-bottom:1.5rem;">Recent Thoughts</div>
-      ${recent.map(p => `
+      ${posts.map(p => `
         <div class="post-item" onclick="showSection('thoughts');openPost('${p.id}')">
-          <div class="post-meta">${formatDate(p.date)}</div>
+          <div class="post-meta">${formatDate(p.created_at)}</div>
           <h3>${escHtml(p.title)}</h3>
           <p class="post-preview">${escHtml(p.body)}</p>
         </div>
@@ -581,27 +383,27 @@ function renderHomeRecent() {
   `;
 }
 
-function openPost(id) {
-  const post = posts.find(p => p.id === id);
-  if (!post) return;
-  document.getElementById('thoughts-list-view').style.display = 'none';
-  const rv = document.getElementById('thoughts-reader-view');
-  rv.style.display = 'block';
-  document.getElementById('post-reader-content').innerHTML = `
-    <button class="reader-back" onclick="closeReader()">← back to thoughts</button>
-    <div class="post-meta">${formatDate(post.date)}</div>
-    <h1>${escHtml(post.title)}</h1>
-    <div class="body">${escHtml(post.body)}</div>
-    <div class="reader-actions">
-      <button class="btn danger" onclick="deletePost('${post.id}')">Delete</button>
-    </div>
-  `;
-}
-
-function closeReader() {
+function showThoughtsList() {
   document.getElementById('thoughts-list-view').style.display = 'block';
   document.getElementById('thoughts-reader-view').style.display = 'none';
-  renderPostList();
+}
+
+async function openPost(id) {
+  let post = postsCache?.find(p => p.id === id);
+  if (!post) {
+    const { data } = await db.from('posts').select('*').eq('id', id).single();
+    post = data;
+  }
+  if (!post) return;
+  document.getElementById('thoughts-list-view').style.display = 'none';
+  document.getElementById('thoughts-reader-view').style.display = 'block';
+  document.getElementById('post-reader-content').innerHTML = `
+    <button class="reader-back" onclick="showThoughtsList();renderPostList()">← back to thoughts</button>
+    <div class="post-meta">${formatDate(post.created_at)}</div>
+    <h1>${escHtml(post.title)}</h1>
+    <div class="body">${escHtml(post.body)}</div>
+    ${isAdmin ? `<div class="reader-actions"><button class="btn danger" onclick="deletePost('${post.id}')">Delete</button></div>` : ''}
+  `;
 }
 
 function openCompose() {
@@ -609,98 +411,98 @@ function openCompose() {
   document.getElementById('compose-body').value = '';
   document.getElementById('compose-modal').classList.add('open');
 }
-function closeCompose() {
-  document.getElementById('compose-modal').classList.remove('open');
-}
+function closeCompose() { document.getElementById('compose-modal').classList.remove('open'); }
 
-function publishPost() {
+async function publishPost() {
   const title = document.getElementById('compose-title').value.trim();
   const body = document.getElementById('compose-body').value.trim();
   if (!title || !body) return;
-  const post = { id: uid(), date: new Date().toISOString(), title, body };
-  posts.push(post);
-  save(STORAGE_KEYS.posts, posts);
+  const btn = document.getElementById('publish-btn');
+  btn.disabled = true; btn.textContent = 'Publishing...';
+  const { error } = await db.from('posts').insert({ title, body });
+  btn.disabled = false; btn.textContent = 'Publish';
+  if (error) { alert('Error: ' + error.message); return; }
+  postsCache = null;
   closeCompose();
+  renderPostList();
+  renderHomeRecent();
+}
+
+async function deletePost(id) {
+  if (!confirm('Delete this post?')) return;
+  await db.from('posts').delete().eq('id', id);
+  postsCache = null;
+  showThoughtsList();
   renderPostList();
 }
 
-function deletePost(id) {
-  if (!confirm('Delete this post?')) return;
-  posts = posts.filter(p => p.id !== id);
-  save(STORAGE_KEYS.posts, posts);
-  closeReader();
-}
-
-// ─── REFLECTIONS ───
+// ── REFLECTIONS ──
 function switchReflectionTab(tab) {
   document.getElementById('reflect-weekly').style.display = tab === 'weekly' ? 'block' : 'none';
   document.getElementById('reflect-monthly').style.display = tab === 'monthly' ? 'block' : 'none';
-  document.getElementById('rtab-weekly').classList.toggle('active', tab === 'weekly');
-  document.getElementById('rtab-monthly').classList.toggle('active', tab === 'monthly');
+  document.querySelectorAll('.rtab').forEach((b, i) => b.classList.toggle('active', i === (tab === 'weekly' ? 0 : 1)));
 }
 
-function renderPromptBlock(containerId, prompt) {
+async function renderPromptBlock(containerId, prompt) {
   const container = document.getElementById(containerId);
-  const entries = reflections.filter(r => r.promptId === prompt.id);
-  const inputId = 'input-' + prompt.id;
-
+  const { data: entries } = await db.from('reflections').select('*').eq('prompt_id', prompt.id).order('created_at', { ascending: false });
+  const list = entries || [];
+  const adminInput = isAdmin
+    ? `<div class="prompt-add"><textarea id="input-${prompt.id}" placeholder="Write your answer..."></textarea><button class="prompt-add-btn" onclick="saveEntry('${prompt.id}','${containerId}')">Save</button></div>`
+    : `<div class="admin-locked">🔒 Unlock admin to add entries</div>`;
   container.innerHTML = `
     <div class="prompt-header">
       <span class="prompt-q">${escHtml(prompt.text)}</span>
-      <span class="prompt-num">${entries.length} entr${entries.length === 1 ? 'y' : 'ies'}</span>
+      <span class="prompt-num">${list.length} entr${list.length === 1 ? 'y' : 'ies'}</span>
     </div>
     <div class="prompt-entries">
-      ${entries.slice().reverse().map(e => `
+      ${list.map(e => `
         <div class="entry-item">
-          <span class="entry-date">${formatDateShort(e.date)}</span>
+          <span class="entry-date">${formatDateShort(e.created_at)}</span>
           <span class="entry-text">${escHtml(e.text)}</span>
-          <button class="entry-del" onclick="deleteEntry('${e.id}','${containerId}','${prompt.id}')">✕</button>
+          ${isAdmin ? `<button class="entry-del" onclick="deleteEntry('${e.id}','${containerId}','${prompt.id}')">✕</button>` : ''}
         </div>
       `).join('')}
     </div>
-    <div class="prompt-add">
-      <textarea id="${inputId}" placeholder="Write your answer..."></textarea>
-      <button class="prompt-add-btn" onclick="saveEntry('${prompt.id}','${inputId}','${containerId}')">Save</button>
-    </div>
+    ${adminInput}
   `;
 }
 
-function saveEntry(promptId, inputId, containerId) {
-  const text = document.getElementById(inputId).value.trim();
+async function saveEntry(promptId, containerId) {
+  const input = document.getElementById('input-' + promptId);
+  const text = input.value.trim();
   if (!text) return;
+  const btn = input.nextElementSibling;
+  btn.disabled = true; btn.textContent = 'Saving...';
+  const { error } = await db.from('reflections').insert({ prompt_id: promptId, text });
+  btn.disabled = false; btn.textContent = 'Save';
+  if (error) { alert('Error: ' + error.message); return; }
   const prompt = [...WEEKLY_PROMPTS, ...MONTHLY_PROMPTS].find(p => p.id === promptId);
-  reflections.push({ id: uid(), promptId, date: new Date().toISOString(), text });
-  save(STORAGE_KEYS.reflections, reflections);
   renderPromptBlock(containerId, prompt);
 }
 
-function deleteEntry(id, containerId, promptId) {
+async function deleteEntry(id, containerId, promptId) {
   if (!confirm('Delete this entry?')) return;
-  reflections = reflections.filter(r => r.id !== id);
-  save(STORAGE_KEYS.reflections, reflections);
+  await db.from('reflections').delete().eq('id', id);
   const prompt = [...WEEKLY_PROMPTS, ...MONTHLY_PROMPTS].find(p => p.id === promptId);
   renderPromptBlock(containerId, prompt);
 }
 
-// ─── UTILS ───
-function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function renderReflectionPrompts() {
+  WEEKLY_PROMPTS.forEach((p, i) => renderPromptBlock('pb-w' + (i+1), p));
+  MONTHLY_PROMPTS.forEach((p, i) => renderPromptBlock('pb-m' + (i+1), p));
+}
+
+// ── UTILS ──
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-}
-function formatDateShort(iso) {
-  return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'2-digit' });
-}
+function formatDate(iso) { return new Date(iso).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }); }
+function formatDateShort(iso) { return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'2-digit' }); }
 
-// ─── INIT ───
-WEEKLY_PROMPTS.forEach((p, i) => renderPromptBlock('pb-w' + (i+1), p));
-MONTHLY_PROMPTS.forEach((p, i) => renderPromptBlock('pb-m' + (i+1), p));
+// ── INIT ──
 renderHomeRecent();
-
-// Close modal on overlay click
-document.getElementById('compose-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeCompose();
-});
+renderReflectionPrompts();
+document.getElementById('pw-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closePwModal(); });
+document.getElementById('compose-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeCompose(); });
 </script>
 </body>
 </html>
